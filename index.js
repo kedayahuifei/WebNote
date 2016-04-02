@@ -1,0 +1,259 @@
+/**
+ * Created by 姜昊 on 2016/3/19.
+ */
+var express     = require("express"),
+    session     = require('express-session'),
+    path        = require('path'),
+    bodyParser  = require('body-parser'),
+    moment      = require('moment'),
+    checkLogin  = require('./checkLogin.js');
+    crypto      = require('crypto');
+
+var mongoose   = require("mongoose");
+
+var models     = require("./models/models");
+
+
+
+var User       = models.User;
+var Note       = models.Note;
+mongoose.connect('mongodb://localhost:27017/notes');
+mongoose.connection.on('error',console.error.bind(console,'连接数据库失败'));
+
+var app = express();
+
+if(typeof errorCode == "undefined"){
+    var errorCode = {
+        errorCode1: 101,
+        errorCode2: 102,
+        errorCode3: 103,
+        errorCode4: 104
+    }
+}
+app.set('views',path.join(__dirname,'views'));
+app.set('view engine','ejs');
+
+app.use(express.static(path.join(__dirname,'public')));
+
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended:true }));
+
+
+app.use(session({
+        secret:'1234',
+        name:'mynote',
+        cookie:{maxAge :1000*60*20},
+        resave :false,
+        saveUninitialized :true
+}));
+
+app.get('/',checkLogin.noLogin);
+app.get('/',function(req,res){
+        Note.find({author:req.session.user.username})
+            .exec(function(err,allNotes){
+                if(err){
+                    console.log(err);
+                    return res.redirect('login');
+                }
+                res.render('index',{
+                    title: '首页',
+                    user :req.session.user,
+                    notes :allNotes
+                });
+            });
+});
+app.get('/noteList',function(req,res){
+    Note.find({author:req.session.user.username})
+        .exec(function(err,allNotes){
+            if(err){
+                console.log(err);
+                return res.redirect('/');
+            }
+            res.render('noteList',{
+                title: '文章列表',
+                user :req.session.user,
+                notes :allNotes
+            });
+        });
+});
+
+
+app.get('/register',checkLogin.haveLogin);
+app.get('/register',function(req,res){
+    res.render('register',{
+        user :req.session.user,
+        title: '注册'
+    });
+});
+app.post('/checkUsername',function(req,res){
+    var username = req.body.user;
+
+    console.log(username);
+    User.findOne({username:username},function(err,user) {
+        if (err) {
+            console.log(err);
+            return res.redirect('/register');
+        }
+        if (user) {
+            console.log('用户名已存在');
+            res.write("用户名已存在");
+            res.end();
+        }else{
+            res.write("");
+            res.end();
+        }
+
+    });
+});
+app.post('/register',function(req,res){
+    var username = req.body.username,
+        password = req.body.password,
+        passwordRepeat = req.body.passwordRepeat;
+
+    if(username.trim().length == 0){
+        console.log("用户名不能为空");
+        return res.redirect('/register');
+    }
+
+    if(password.trim().length == 0||passwordRepeat.trim().length ==0){
+        console.log("密码不能为空");
+        return res.redirect('/register');
+    }
+    if(password != passwordRepeat){
+        console.log("两次输入密码不一样");
+        return res.redirect('/register');
+    }
+    User.findOne({username:username},function(err,user){
+        if(err){
+            console.log(err);
+            return res.redirect('/register');
+        }
+        if(user){
+            console.log('用户名已存在');
+            return res.redirect('/register');
+        }
+        var md5 = crypto.createHash('md5'),
+            md5Password = md5.update(password).digest('hex');
+
+        var newUser  = new User({
+                        username:username,
+                        password:password
+                        });
+
+        newUser.save(function(err,doc){
+            if(err){
+                console.log(err);
+                return res.redirect('/');
+            }
+            console.log('注册成功');
+            return res.redirect('/');
+        });
+
+    });
+
+});
+
+app.get('/login',checkLogin.haveLogin);
+app.get('/login',function(req,res){
+    res.render('login',{
+        error:req.session.error,
+        user :req.session.user,
+        title: '登录'
+    });
+});
+app.post('/login',function(req,res){
+    var username = req.body.username,
+        password = req.body.password;
+
+    User.findOne({username:username},function(err,user){
+        if(err){
+            console.log('err');
+            return res.redirect('/login');
+        }
+        if(!user){
+            console.log('用户不存在');
+            req.session.error = 101;
+            return res.redirect('/login');
+        }
+        var md5 = crypto.createHash('md5'),
+            md5Password = md5.update(password).digest('hex');
+        if(user.password != password){
+            console.log('密码错误');
+            req.session.error = 102;
+            return res.redirect('/login');
+        }
+        console.log('登陆成功');
+        if(req.body.freeLogin){
+            res.cookie('isFreeLogin', true, {maxAge: 1000*60*60*24*7});
+            res.cookie('user', user, {maxAge: 1000*60*60*24*7});
+        }
+        req.session.error = null;
+        user.password = null;
+        delete user.password;
+        req.session.user = user;
+        return res.redirect('/');
+
+    });
+});
+
+app.get('/quit',function(req,res){
+   req.session.user =null;
+    res.cookie('isFreeLogin', null, {maxAge: 0});
+    res.cookie('user', null, {maxAge:0});
+    res.redirect('/login');
+});
+
+app.get('/post',function(req,res){
+    res.render('post',{
+        user : req.session.user,
+        title: '发布'
+    });
+});
+app.post('/post',function(req,res){
+    var note  = new Note({
+                title : req.body.title,
+                author : req.session.user.username,
+                tag : req.body.tag,
+                content: req.body.content
+                });
+
+    note.save(function(err,doc){
+        if(err){
+            console.log(err);
+            return res.redirect('/post');
+        }
+        console.log('文章发表成功');
+        return res.redirect('/');
+    })
+});
+app.get('/detail/:_id',function(req,res){
+    console.log('查看笔记');
+    Note.findOne({_id: req.params._id})
+        .exec(function(err,art){
+            if(err){
+                console.log(err);
+                return res.redirect('/');
+            }
+            if(art){
+                res.render('note',{
+                    title :'笔记详情',
+                    user : req.session.user,
+                    art : art,
+                    moment :moment
+                })
+            }
+         });
+});
+app.get('/detail',function(req,res){
+    res.render('index',{
+        user : req.session.user,
+        title: '查看笔记'
+    });
+});
+
+app.listen(3000,function(request , response){
+    console.log("app is running at port 3000");
+});
