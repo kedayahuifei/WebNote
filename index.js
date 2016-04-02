@@ -148,7 +148,7 @@ app.post('/register',function(req,res){
                 console.log(err);
                 return res.redirect('/');
             }
-            req.session.user = newUser; 
+            req.session.user = newUser;
             console.log('register success');
             return res.redirect('/');
         });
@@ -201,7 +201,7 @@ app.post('/login',function(req,res){
 });
 
 app.get('/quit',function(req,res){
-   req.session.user =null;
+    req.session.user =null;
     res.cookie('isFreeLogin', null, {maxAge: 0});
     res.cookie('user', null, {maxAge:0});
     res.redirect('/login');

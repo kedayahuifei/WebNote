@@ -10,6 +10,8 @@ function noLogin(req,res,next){
 }
 function haveLogin(req,res,next){
     if(req.cookies.isFreeLogin){
+        console.log(req.cookies.isFreeLogin);
+        console.log(req.cookies.user.username);
         req.session.user = req.cookies.user;
         return res.redirect('/');
     }
