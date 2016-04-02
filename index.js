@@ -18,7 +18,7 @@ var models     = require("./models/models");
 var User       = models.User;
 var Note       = models.Note;
 mongoose.connect('mongodb://localhost:27017/notes');
-mongoose.connection.on('error',console.error.bind(console,'连接数据库失败'));
+mongoose.connection.on('error',console.error.bind(console,'connect db failed'));
 
 var app = express();
 
@@ -98,7 +98,7 @@ app.post('/checkUsername',function(req,res){
             return res.redirect('/register');
         }
         if (user) {
-            console.log('用户名已存在');
+            console.log('user exit');
             res.write("用户名已存在");
             res.end();
         }else{
@@ -114,16 +114,16 @@ app.post('/register',function(req,res){
         passwordRepeat = req.body.passwordRepeat;
 
     if(username.trim().length == 0){
-        console.log("用户名不能为空");
+        console.log("username connot be empty");
         return res.redirect('/register');
     }
 
     if(password.trim().length == 0||passwordRepeat.trim().length ==0){
-        console.log("密码不能为空");
+        console.log("password connot be empty");
         return res.redirect('/register');
     }
     if(password != passwordRepeat){
-        console.log("两次输入密码不一样");
+        console.log("confirm password wrong");
         return res.redirect('/register');
     }
     User.findOne({username:username},function(err,user){
@@ -132,7 +132,7 @@ app.post('/register',function(req,res){
             return res.redirect('/register');
         }
         if(user){
-            console.log('用户名已存在');
+            console.log('username exit');
             return res.redirect('/register');
         }
         var md5 = crypto.createHash('md5'),
@@ -148,7 +148,7 @@ app.post('/register',function(req,res){
                 console.log(err);
                 return res.redirect('/');
             }
-            console.log('注册成功');
+            console.log('register success');
             return res.redirect('/');
         });
 
@@ -174,18 +174,18 @@ app.post('/login',function(req,res){
             return res.redirect('/login');
         }
         if(!user){
-            console.log('用户不存在');
+            console.log('user not exit');
             req.session.error = 101;
             return res.redirect('/login');
         }
         var md5 = crypto.createHash('md5'),
             md5Password = md5.update(password).digest('hex');
         if(user.password != password){
-            console.log('密码错误');
+            console.log('wrong passwrod');
             req.session.error = 102;
             return res.redirect('/login');
         }
-        console.log('登陆成功');
+        console.log('login success');
         if(req.body.freeLogin){
             res.cookie('isFreeLogin', true, {maxAge: 1000*60*60*24*7});
             res.cookie('user', user, {maxAge: 1000*60*60*24*7});
@@ -225,7 +225,7 @@ app.post('/post',function(req,res){
             console.log(err);
             return res.redirect('/post');
         }
-        console.log('文章发表成功');
+        console.log('note post success');
         return res.redirect('/');
     })
 });
