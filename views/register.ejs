@@ -28,11 +28,6 @@
                         $("#usernameError").html(data);
                     });
                 });
-                $.validator.setDefaults({
-                    submitHandler: function() {
-                        alert("提交事件!");
-                    }
-                });
                 $().ready(function() {
                     jQuery.validator.addMethod("usernameCheck", function(value, element, param) {
                         var length = value.length;

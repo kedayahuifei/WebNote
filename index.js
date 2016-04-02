@@ -148,6 +148,7 @@ app.post('/register',function(req,res){
                 console.log(err);
                 return res.redirect('/');
             }
+            req.session.user = newUser; 
             console.log('register success');
             return res.redirect('/');
         });
