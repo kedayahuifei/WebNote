@@ -9,7 +9,7 @@ function noLogin(req,res,next){
     next();
 }
 function haveLogin(req,res,next){
-    if(req.cookies.isFreeLogin){
+    if(req.cookies.isFreeLogin==true){
         console.log(req.cookies.isFreeLogin);
         console.log(req.cookies.user.username);
         req.session.user = req.cookies.user;
