@@ -1,72 +1,114 @@
 <%- include header.ejs%>
 
-<div class="text-center page-title">新用户注册</div>
-<div class="container">
-    <div clas="row">
-        <div class="col-xs-4 col-xs-offset-4">
-            <form id="registerForm" method="post">
-                <label id ="usernameError" ></label>
-                <div class="form-group">
-                    <input type="text" id ="username" class="form-control" name ="username" placeholder="用户名">
-                </div>
-                <div class="form-group">
-                    <input type="password" id ="password" class="form-control" name ="password" placeholder="密码">
-                </div>
-                <div class="form-group">
-                    <input type="password" id ="passwordRepeat" class="form-control" name ="passwordRepeat" placeholder="确认密码">
-                </div>
-                <button type="submit" class="btn btn-default center-block">注册</button>
-            </form>
+<body class="login-layout light-login">
+<div class="main-container">
+    <div class="main-content">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                        <div class="widget-body">
+                            <div class="widget-main">
+                                <h4 class="header blue lighter bigger center">
+                                    <i class="ace-icon fa fa-coffee green"></i>
+                                    新用户注册
+                                </h4>
 
-            <!--<script src="/jquery_validation_1.14.0/lib/jquery.js"></script>-->
-            <script src="/jquery_validation_1.14.0/dist/jquery.validate.js"></script>
-            <script src="/jquery_validation_1.14.0/dist/localization/messages_zh.js"></script>
-            <script>
-                $("#username").change(function(){
-                    var username = $("#username").val();
-                    $.post('/checkUsername',{user:username},function(data,status){
-                        $("#usernameError").html(data);
-                    });
-                });
-                $().ready(function() {
-                    jQuery.validator.addMethod("usernameCheck", function(value, element, param) {
-                        var length = value.length;
-                        if(length<3||length>20)
-                            return false;
-                        var checkout = /^[a-zA-Z0-9_]{1,}$/;
-                        return value.match(checkout);
-                    }, $.validator.format("请确保是字母、数字、下划线的组合，长度3-20个字符"));
-                    jQuery.validator.addMethod("passwordCheck", function(value, element, param) {
-                        var length = value.length;
-                        if(length<6)
-                            return false;
-                        var checkout = /(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[a-zA-Z0-9]/;
-                        return value.match(checkout);
-                    }, $.validator.format("请确保长度不能少于6，必须同时包含数字、小写字母、大写字母。"));
-                    $("#registerForm").validate({
-                        rules: {
-                            username: "required",
-                            password: "required",
-                            username: "usernameCheck",
-                            password: "passwordCheck",
-                            passwordRepeat: {
-                                required: true,
-                                minlength: 6,
-                                equalTo: "#password"
-                            }
-                        },
-                        messages: {
-                            passwordRepeat: {
-                                required: "请输入密码",
-                                minlength: "密码长度不能小于 5 个字母",
-                                equalTo: "两次密码输入不一致"
-                            }
-                        }
-                    });
-                });
-            </script>
-        </div>
-    </div>
-</div>
-
-<%- include footer.ejs%>
+                                <div class="space-6"></div>
+                                <form class="form-horizontal" id="sample-form" method="post">
+                                    <div id="usernameform" class="form-group">
+                                        <label class="col-sm-2 control-label no-padding-right" >用户名</label>
+                                        <div class="col-sm-9">
+                                            <span class="block input-icon input-icon-right">
+											    <input type="text" id="username" name="username" placeholder="用户名" class="width-100">
+											    <i class="ace-icon fa fa-user"></i>
+											</span>
+                                            <label class=" control-label " >请确保是字母、数字、下划线的组合，长度3-20个字符</label>
+                                        </div>
+                                    </div>
+                                    <div id="passwordform" class="form-group">
+                                        <label class="col-sm-2 control-label no-padding-right" >密码</label>
+                                        <div class="col-sm-9">
+                                            <span class="block input-icon input-icon-right">
+											    <input type="password" id="password" name="password" placeholder="密码" class="width-100">
+											    <i class="ace-icon fa fa-lock"></i>
+											</span>
+                                            <label class=" control-label " >请确保长度不能少于6，必须同时包含数字、小写字母、大写字母。</label>
+                                        </div>
+                                    </div>
+                                    <div id="passwordconform" class="form-group">
+                                        <label class="col-sm-2 control-label no-padding-right" >密码确认</label>
+                                        <div class="col-sm-9">
+                                            <span class="block input-icon input-icon-right">
+											    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="密码确认" class="width-100">
+											    <i class="ace-icon fa fa-retweet"></i>
+											</span>
+                                            <label class=" control-label " >再次输入密码</label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix form-actions">
+                                        <button type="button" id="reset" class="width-35 pull-left btn btn-sm btn-primary">
+                                            <i class="ace-icon fa fa-undo"></i>
+                                            <span class="bigger-110">重置</span>
+                                        </button>
+                                        <button type="button submit" id="register" class="width-35 pull-right btn btn-sm btn-primary">
+                                            <i class="ace-icon fa fa-key"></i>
+                                            <span class="bigger-110">注册</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div><!-- /.widget-body -->
+                        </div><!-- /.login-box -->
+            </div><!-- /.row -->
+        </div><!-- /.main-content -->
+    </div><!-- /.main-container -->
+    <script  type="text/javascript">
+        $('#username').blur(function(){
+            var username =  $('#username').val();
+            var length = username.length;
+            if(length<3||length>20)
+                $('#usernameform').attr("class","form-group has-error");
+            else{
+                var checkout =  /^[a-zA-Z0-9_]{1,}$/;
+                console.log(username.match(checkout));
+                if(username.match(checkout)==null)
+                    $('#usernameform').attr("class","form-group has-error");
+                else
+                    $('#usernameform').attr("class","form-group has-success");
+            }
+        });
+        $('#password').blur(function(){
+            var password =  $('#password').val();
+            var length = password.length;
+            if(length<6)
+                $('#passwordform').attr("class","form-group has-error");
+            else{
+                var checkout =  /(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[a-zA-Z0-9]/;
+                console.log(password.match(checkout));
+                if(password.match(checkout)==null)
+                    $('#passwordform').attr("class","form-group has-error");
+                else
+                    $('#passwordform').attr("class","form-group has-success");
+            }
+        });
+        $('#passwordConfirm').blur(function(){
+            var password =  $('#password').val();
+            var passwordConfirm=  $('#passwordConfirm').val();
+            console.log(password);
+            console.log(passwordConfirm);
+            if(password!=passwordConfirm)
+                $('#passwordconform').attr("class","form-group has-error");
+            else{
+                $('#passwordconform').attr("class","form-group has-success");
+            }
+        });
+        $('#reset').click(function(){
+            console.log("reset");
+            $('#username').val("");
+            $('#password').val("");
+            $('#passwordConfirm').val("");
+            $('#usernameform').attr("class","form-group");
+            $('#passwordform').attr("class","form-group");
+            $('#passwordconform').attr("class","form-group");
+        });
+    </script>
+</body>
+</html>

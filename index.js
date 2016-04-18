@@ -14,10 +14,10 @@ var mongoose   = require("mongoose");
 var models     = require("./models/models");
 
 
-
+var loginError =100;
 var User       = models.User;
 var Note       = models.Note;
-mongoose.connect('mongodb://localhost:27017/notes');
+mongoose.connect('mongodb://127.0.0.1:27017/notes');
 mongoose.connection.on('error',console.error.bind(console,'connect db failed'));
 
 var app = express();
@@ -102,7 +102,7 @@ app.post('/checkUsername',function(req,res){
             res.write("用户名已存在");
             res.end();
         }else{
-            res.write("");
+            res.write("default");
             res.end();
         }
 
@@ -160,9 +160,38 @@ app.post('/register',function(req,res){
 app.get('/login',checkLogin.haveLogin);
 app.get('/login',function(req,res){
     res.render('login',{
-        error:req.session.error,
+        error:loginError,
         user :req.session.user,
         title: '登录'
+    });
+    loginError =100;
+});
+
+app.post('/loginCheck',function(req,res){
+    var username = req.body.username,
+        password = req.body.password;
+
+    User.findOne({username:username},function(err,user){
+        if(err){
+            console.log('err');
+            return res.redirect('/login');
+        }
+        if(!user){
+            console.log('user not exit');
+            res.write("用户名不存在");
+            res.end();
+        }else{
+            var md5 = crypto.createHash('md5'),
+                md5Password = md5.update(password).digest('hex');
+            if(user.password != password){
+                console.log('wrong passwrod');
+                res.write("密码不正确");
+                res.end();
+            }else{
+                res.write("success");
+                res.end();
+            }
+        }
     });
 });
 app.post('/login',function(req,res){
@@ -176,14 +205,14 @@ app.post('/login',function(req,res){
         }
         if(!user){
             console.log('user not exit');
-            req.session.error = 101;
+            loginError = 101;
             return res.redirect('/login');
         }
         var md5 = crypto.createHash('md5'),
             md5Password = md5.update(password).digest('hex');
         if(user.password != password){
             console.log('wrong passwrod');
-            req.session.error = 102;
+            loginError = 102;
             return res.redirect('/login');
         }
         console.log('login success');
@@ -191,7 +220,6 @@ app.post('/login',function(req,res){
             res.cookie('isFreeLogin', true, {maxAge: 1000*60*60*24*7});
             res.cookie('user', user, {maxAge: 1000*60*60*24*7});
         }
-        req.session.error = null;
         user.password = null;
         delete user.password;
         req.session.user = user;
@@ -207,6 +235,7 @@ app.get('/quit',function(req,res){
     res.redirect('/login');
 });
 
+app.get('/post',checkLogin.noLogin);
 app.get('/post',function(req,res){
     res.render('post',{
         user : req.session.user,
@@ -255,6 +284,6 @@ app.get('/detail',function(req,res){
     });
 });
 
-app.listen(3000,function(request , response){
-    console.log("app is running at port 3000");
+app.listen(5000,function(request , response){
+    console.log("app is running at port 5000");
 });

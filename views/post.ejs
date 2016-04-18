@@ -1,21 +1,241 @@
-<%- include header%>
+<%- include header.ejs %>
+<body class="no-skin">
+<div id="navbar" class="navbar navbar-default">
+    <script type="text/javascript">
+        try{ace.settings.check('navbar' , 'fixed')}catch(e){}
+    </script>
 
-<div class="container">
-    <div clas="row">
-        <div class="col-xs-4 col-xs-offset-4">
-            <form method="post">
-                <div class="form-group">
-                    <input type="text" class="form-control" name ="title" placeholder="标题">
-                </div>
-                <div class="form-group">
-                    <input type="text" class="form-control" name ="tag" placeholder="标签">
-                </div>
-                <div class="form-group">
-                    <textarea type="text" class="form-control" name ="content" placeholder="文章内容"></textarea>
-                </div>
-                <button type="submit" class="btn btn-default center-block">发表</button>
-            </form>
+    <div class="navbar-container" id="navbar-container">
+        <!-- #section:basics/sidebar.mobile.toggle -->
+        <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar">
+            <span class="sr-only">Toggle sidebar</span>
+
+            <span class="icon-bar"></span>
+
+            <span class="icon-bar"></span>
+
+            <span class="icon-bar"></span>
+        </button>
+        <!-- /section:basics/sidebar.mobile.toggle -->
+        <div class="navbar-header pull-left">
+            <!-- #section:basics/navbar.layout.brand -->
+            <a href="/" class="navbar-brand">
+                <middle>
+                    <i class="fa fa-folder-open"></i>
+                    WebNote
+                </middle>
+            </a>
+            <!-- /section:basics/navbar.layout.brand -->
+
+            <!-- #section:basics/navbar.toggle -->
+
+            <!-- /section:basics/navbar.toggle -->
         </div>
-    </div>
+        <!-- #section:basics/navbar.dropdown -->
+        <div class="navbar-buttons navbar-header pull-right" role="navigation">
+            <ul class="nav ace-nav">
+                <!-- #section:basics/navbar.user_menu -->
+                <li class="light-blue">
+                    <a data-toggle="dropdown" href="#" class="dropdown-toggle">
+
+                        <large>欢迎你，<%= user.username %>!</large>
+                        <i class="ace-icon fa fa-caret-down"></i>
+                    </a>
+
+                    <ul class="user-menu dropdown-menu-right dropdown-menu dropdown-yellow dropdown-caret dropdown-closer">
+                        <li>
+                            <a href="#">
+                                <i class="ace-icon fa fa-power-off"></i>
+                                Logout
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- /section:basics/navbar.user_menu -->
+            </ul>
+        </div>
+        <!-- /section:basics/navbar.dropdown -->
+    </div><!-- /.navbar-container -->
 </div>
-<%- include footer%>
+<div class="main-container">
+    <div id="sidebar" class="sidebar      responsive">
+        <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+            <button id="create" class="btn btn-info">
+                <i class="ace-icon fa fa-pencil align-top bigger-125"></i>
+                新建
+            </button>
+
+            <button class="btn btn-warning">
+                <i class="ace-icon fa fa-cloud-upload align-top bigger-125"></i>
+                上传
+            </button>
+        </div>
+        <ul class="nav nav-list">
+            <li class="" id="homepage">
+                <a href="/">
+                    <i class="menu-icon fa fa-tachometer"></i>
+                    <span class="menu-text"> 主页 </span>
+                </a>
+                <b class="arrow"></b>
+            </li>
+            <li class=""id="notelist">
+                <a href="/notelist">
+                    <i class="menu-icon fa fa-tachometer"></i>
+                    <span class="menu-text"> 日记列表 </span>
+                </a>
+
+                <b class="arrow"></b>
+            </li>
+
+            <li class="">
+                <a href="#" class="dropdown-toggle">
+                    <i class="menu-icon fa fa-desktop"></i>
+                    <span class="menu-text"> 我的文件夹 </span>
+
+                    <b class="arrow fa fa-angle-down"></b>
+                </a>
+
+                <b class="arrow"></b>
+
+                <ul class="submenu">
+                    <li class="">
+                        <a >
+                            <i class="menu-icon fa fa-caret-right"></i>
+                            最近更新
+                        </a>
+                        <b class="arrow"></b>
+                    </li>
+
+                    <li class="">
+                        <a>
+                            <i class="menu-icon fa fa-caret-right"></i>
+                            回收站
+                        </a>
+
+                        <b class="arrow"></b>
+                    </li>
+                </ul>
+            </li>
+        </ul><!-- /.nav-list -->
+
+    </div>
+    <div class="main-content">
+        <div class="page-content" >
+            <div class="row">
+                <div class="col-xs-8 col-xs-offset-2" >
+                    <!-- PAGE CONTENT BEGINS -->
+                    <form class="form-horizontal">
+                        <h3 class="  green ">
+                            欢迎使用WebMote
+                        </h3>
+                        <div class=" clearfix">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label no-padding-right" for="form-field-1-1"> 标题</label>
+                                <div class="col-sm-9">
+                                    <input type="text" id="form-field-1-1" placeholder="Text Field" class="form-control">
+                                </div>
+                            </div>
+                            <div class="space-4"></div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label no-padding-right" for="form-field-tags">标签</label>
+
+                                <div class="col-sm-9">
+                                    <!-- #section:plugins/input.tag-input -->
+                                    <input class="form-control  width-100" id="form-field-tags" type="text" placeholder="">
+                                    <!-- /section:plugins/input.tag-input -->
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="wysiwyg-editor" id="editor1"></div>
+                            <div class="hr hr-double dotted"></div>
+                        </div>
+                    </form>
+                    <!-- PAGE CONTENT ENDS -->
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.page-content -->
+    </div><!-- /.main-content -->
+</div>
+
+<!-- page specific plugin scripts -->
+<script src="../assets/js/jquery-ui.custom.js"></script>
+<script src="../assets/js/jquery.ui.touch-punch.js"></script>
+<script src="../assets/js/markdown/markdown.js"></script>
+<script src="../assets/js/markdown/bootstrap-markdown.js"></script>
+<script src="../assets/js/jquery.hotkeys.js"></script>
+<script src="../assets/js/bootstrap-wysiwyg.js"></script>
+<script src="../assets/js/bootbox.js"></script>
+
+<!-- ace scripts -->
+<script src="../assets/js/ace/elements.scroller.js"></script>
+<script src="../assets/js/ace/elements.colorpicker.js"></script>
+<script src="../assets/js/ace/elements.fileinput.js"></script>
+<script src="../assets/js/ace/elements.typeahead.js"></script>
+<script src="../assets/js/ace/elements.wysiwyg.js"></script>
+<script src="../assets/js/ace/elements.spinner.js"></script>
+<script src="../assets/js/ace/elements.treeview.js"></script>
+<script src="../assets/js/ace/elements.wizard.js"></script>
+<script src="../assets/js/ace/elements.aside.js"></script>
+<script src="../assets/js/ace/ace.js"></script>
+<script src="../assets/js/ace/ace.ajax-content.js"></script>
+<script src="../assets/js/ace/ace.touch-drag.js"></script>
+<script src="../assets/js/ace/ace.sidebar.js"></script>
+<script src="../assets/js/ace/ace.sidebar-scroll-1.js"></script>
+<script src="../assets/js/ace/ace.submenu-hover.js"></script>
+<script src="../assets/js/ace/ace.widget-box.js"></script>
+<script src="../assets/js/ace/ace.settings.js"></script>
+<script src="../assets/js/ace/ace.settings-rtl.js"></script>
+<script src="../assets/js/ace/ace.settings-skin.js"></script>
+<script src="../assets/js/ace/ace.widget-on-reload.js"></script>
+<script src="../assets/js/ace/ace.searchbox-autocomplete.js"></script>
+<script>
+    function showErrorAlert (reason, detail) {
+        var msg='';
+        if (reason==='unsupported-file-type') { msg = "Unsupported format " +detail; }
+        else {
+            //console.log("error uploading file", reason, detail);
+        }
+        $('<div class="alert"> <button type="button" class="close" data-dismiss="alert">&times;</button>'+
+                '<strong>File upload error</strong> '+msg+' </div>').prependTo('#alerts');
+    }
+    $('#editor1').ace_wysiwyg({
+        toolbar:
+                [
+                    'font',
+                    null,
+                    'fontSize',
+                    null,
+                    {name:'bold', className:'btn-info'},
+                    {name:'italic', className:'btn-info'},
+                    {name:'strikethrough', className:'btn-info'},
+                    {name:'underline', className:'btn-info'},
+                    null,
+                    {name:'insertunorderedlist', className:'btn-success'},
+                    {name:'insertorderedlist', className:'btn-success'},
+                    {name:'outdent', className:'btn-purple'},
+                    {name:'indent', className:'btn-purple'},
+                    null,
+                    {name:'justifyleft', className:'btn-primary'},
+                    {name:'justifycenter', className:'btn-primary'},
+                    {name:'justifyright', className:'btn-primary'},
+                    {name:'justifyfull', className:'btn-inverse'},
+                    null,
+                    {name:'createLink', className:'btn-pink'},
+                    {name:'unlink', className:'btn-pink'},
+                    null,
+                    {name:'insertImage', className:'btn-success'},
+                    null,
+                    'foreColor',
+                    null,
+                    {name:'undo', className:'btn-grey'},
+                    {name:'redo', className:'btn-grey'}
+                ],
+        'wysiwyg': {
+            fileUploadError: showErrorAlert
+        }
+    }).prev().addClass('wysiwyg-style2');
+</script>
+</body>
+</html>
