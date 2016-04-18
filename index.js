@@ -111,7 +111,7 @@ app.post('/checkUsername',function(req,res){
 app.post('/register',function(req,res){
     var username = req.body.username,
         password = req.body.password,
-        passwordRepeat = req.body.passwordRepeat;
+        passwordRepeat = req.body.passwordConfirm;
 
     if(username.trim().length == 0){
         console.log("username connot be empty");
@@ -243,10 +243,11 @@ app.get('/post',function(req,res){
     });
 });
 app.post('/post',function(req,res){
+    console.log("post post");
     var note  = new Note({
-                title : req.body.title,
+                title : req.body.notetitle,
                 author : req.session.user.username,
-                tag : req.body.tag,
+                tag : req.body.notetag,
                 content: req.body.content
                 });
 

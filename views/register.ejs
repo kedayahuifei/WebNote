@@ -1,6 +1,34 @@
 <%- include header.ejs%>
 
 <body class="login-layout light-login">
+<div id="navbar" class="navbar navbar-default">
+    <script type="text/javascript">
+        try{ace.settings.check('navbar' , 'fixed')}catch(e){}
+    </script>
+
+    <div class="navbar-container" id="navbar-container">
+        <!-- #section:basics/sidebar.mobile.toggle -->
+        <button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar">
+            <span class="sr-only">Toggle sidebar</span>
+
+            <span class="icon-bar"></span>
+
+            <span class="icon-bar"></span>
+
+            <span class="icon-bar"></span>
+        </button>
+        <!-- /section:basics/sidebar.mobile.toggle -->
+        <div class="navbar-header pull-left">
+            <!-- #section:basics/navbar.layout.brand -->
+            <a href="/" class="navbar-brand">
+                <middle>
+                    <i class="fa fa-folder-open"></i>
+                    WebNote
+                </middle>
+            </a>
+        </div>
+    </div><!-- /.navbar-container -->
+</div>
 <div class="main-container">
     <div class="main-content">
         <div class="row">
@@ -13,6 +41,8 @@
                                 </h4>
 
                                 <div class="space-6"></div>
+                                <h4 id="usernameError" class="red">
+                                </h4>
                                 <form class="form-horizontal" id="sample-form" method="post">
                                     <div id="usernameform" class="form-group">
                                         <label class="col-sm-2 control-label no-padding-right" >用户名</label>
@@ -21,7 +51,7 @@
 											    <input type="text" id="username" name="username" placeholder="用户名" class="width-100">
 											    <i class="ace-icon fa fa-user"></i>
 											</span>
-                                            <label class=" control-label " >请确保是字母、数字、下划线的组合，长度3-20个字符</label>
+                                            <label class=" control-label pull-left" >请确保是字母、数字、下划线的组合，长度3-20个字符</label>
                                         </div>
                                     </div>
                                     <div id="passwordform" class="form-group">
@@ -31,7 +61,7 @@
 											    <input type="password" id="password" name="password" placeholder="密码" class="width-100">
 											    <i class="ace-icon fa fa-lock"></i>
 											</span>
-                                            <label class=" control-label " >请确保长度不能少于6，必须同时包含数字、小写字母、大写字母。</label>
+                                            <label class=" control-label pull-left" >请确保长度不能少于6，必须同时包含数字、小写字母、大写字母。</label>
                                         </div>
                                     </div>
                                     <div id="passwordconform" class="form-group">
@@ -41,7 +71,7 @@
 											    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="密码确认" class="width-100">
 											    <i class="ace-icon fa fa-retweet"></i>
 											</span>
-                                            <label class=" control-label " >再次输入密码</label>
+                                            <label class=" control-label pull-left" >再次输入密码</label>
                                         </div>
                                     </div>
                                     <div class="clearfix form-actions">
@@ -63,17 +93,28 @@
     <script  type="text/javascript">
         $('#username').blur(function(){
             var username =  $('#username').val();
-            var length = username.length;
-            if(length<3||length>20)
-                $('#usernameform').attr("class","form-group has-error");
-            else{
-                var checkout =  /^[a-zA-Z0-9_]{1,}$/;
-                console.log(username.match(checkout));
-                if(username.match(checkout)==null)
+            $.post('/checkUsername',{user:username},function(data,status){
+
+                if(data!="default"){
+                    $("#usernameError").html(data);
                     $('#usernameform').attr("class","form-group has-error");
-                else
-                    $('#usernameform').attr("class","form-group has-success");
-            }
+                }
+                else{
+                    $("#usernameError").html("");
+                    var length = username.length;
+                    if(length<3||length>20)
+                        $('#usernameform').attr("class","form-group has-error");
+                    else{
+                        var checkout =  /^[a-zA-Z0-9_]{1,}$/;
+                        console.log(username.match(checkout));
+                        if(username.match(checkout)==null)
+                            $('#usernameform').attr("class","form-group has-error");
+                        else
+                            $('#usernameform').attr("class","form-group has-success");
+                    }
+                }
+            });
+
         });
         $('#password').blur(function(){
             var password =  $('#password').val();
