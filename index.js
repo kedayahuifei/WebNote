@@ -8,28 +8,21 @@ var express     = require("express"),
     moment      = require('moment'),
     checkLogin  = require('./checkLogin.js');
     crypto      = require('crypto');
-
-var mongoose   = require("mongoose");
-
-var models     = require("./models/models");
-
+var w_config = require('./waterline/config').config;
+var w_orm    =  require('./waterline/instance').orm;
 
 var loginError =100;
-var User       = models.User;
-var Note       = models.Note;
-mongoose.connect('mongodb://127.0.0.1:27017/notes');
-mongoose.connection.on('error',console.error.bind(console,'connect db failed'));
-
+var User;
+var Note;
 var app = express();
 
-if(typeof errorCode == "undefined"){
-    var errorCode = {
-        errorCode1: 101,
-        errorCode2: 102,
-        errorCode3: 103,
-        errorCode4: 104
-    }
-}
+w_orm.initialize(w_config,function(err,models){
+    if(err) throw err;
+    console.log("database initialize success");
+    User = models.collections.user;
+    Note = models.collections.note;
+});
+
 app.set('views',path.join(__dirname,'views'));
 app.set('view engine','ejs');
 
@@ -65,9 +58,11 @@ app.get('/',function(req,res){
                 });
             });
 });
-app.get('/noteList',function(req,res){
+
+app.get('/notelist',function(req,res){
     Note.find({author:req.session.user.username})
-        .exec(function(err,allNotes){
+        .exec(function(err, allNotes) {
+            console.log(allNotes);
             if(err){
                 console.log(err);
                 return res.redirect('/');
@@ -92,7 +87,8 @@ app.post('/checkUsername',function(req,res){
     var username = req.body.user;
 
     console.log(username);
-    User.findOne({username:username},function(err,user) {
+    User.findOne({ username: username })
+        .exec(function(err, user) {
         if (err) {
             console.log(err);
             return res.redirect('/register');
@@ -126,7 +122,9 @@ app.post('/register',function(req,res){
         console.log("confirm password wrong");
         return res.redirect('/register');
     }
-    User.findOne({username:username},function(err,user){
+
+    User.findOne({ username: username })
+        .exec(function(err, user) {
         if(err){
             console.log(err);
             return res.redirect('/register');
@@ -137,22 +135,16 @@ app.post('/register',function(req,res){
         }
         var md5 = crypto.createHash('md5'),
             md5Password = md5.update(password).digest('hex');
-
-        var newUser  = new User({
-                        username:username,
-                        password:password
-                        });
-
-        newUser.save(function(err,doc){
-            if(err){
-                console.log(err);
+        User.create({ username: username ,password:password,createTime:new Date()})
+            .exec(function(err, newuser) {
+                if(err){
+                    console.log(err);
+                    return res.redirect('/');
+                }
+                req.session.user = newuser;
+                console.log('register success');
                 return res.redirect('/');
-            }
-            req.session.user = newUser;
-            console.log('register success');
-            return res.redirect('/');
         });
-
     });
 
 });
@@ -167,38 +159,11 @@ app.get('/login',function(req,res){
     loginError =100;
 });
 
-app.post('/loginCheck',function(req,res){
-    var username = req.body.username,
-        password = req.body.password;
-
-    User.findOne({username:username},function(err,user){
-        if(err){
-            console.log('err');
-            return res.redirect('/login');
-        }
-        if(!user){
-            console.log('user not exit');
-            res.write("用户名不存在");
-            res.end();
-        }else{
-            var md5 = crypto.createHash('md5'),
-                md5Password = md5.update(password).digest('hex');
-            if(user.password != password){
-                console.log('wrong passwrod');
-                res.write("密码不正确");
-                res.end();
-            }else{
-                res.write("success");
-                res.end();
-            }
-        }
-    });
-});
 app.post('/login',function(req,res){
     var username = req.body.username,
         password = req.body.password;
-
-    User.findOne({username:username},function(err,user){
+    User.findOne({ username: username })
+        .exec(function(err, user) {
         if(err){
             console.log('err');
             return res.redirect('/login');
@@ -224,7 +189,6 @@ app.post('/login',function(req,res){
         delete user.password;
         req.session.user = user;
         return res.redirect('/');
-
     });
 });
 
@@ -244,14 +208,13 @@ app.get('/post',function(req,res){
 });
 app.post('/post',function(req,res){
     console.log("post post");
-    var note  = new Note({
-                title : req.body.notetitle,
-                author : req.session.user.username,
-                tag : req.body.notetag,
-                content: req.body.content
-                });
-
-    note.save(function(err,doc){
+    Note.create({
+            title : req.body.notetitle,
+            author : req.session.user.username,
+            tag : req.body.notetag,
+            content: req.body.content,
+            createTime :new Date()})
+        .exec(function(err, doc) {
         if(err){
             console.log(err);
             return res.redirect('/post');
@@ -260,9 +223,9 @@ app.post('/post',function(req,res){
         return res.redirect('/');
     })
 });
-app.get('/detail/:_id',function(req,res){
+app.get('/detail/:id',function(req,res){
     console.log('查看笔记');
-    Note.findOne({_id: req.params._id})
+    Note.findOne({id: req.params.id})
         .exec(function(err,art){
             if(err){
                 console.log(err);
